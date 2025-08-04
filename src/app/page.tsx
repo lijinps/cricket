@@ -7,10 +7,12 @@ import TeamCollaborationSection from "@/components/TeamCollaborationSection";
 import FeaturesGrid from "@/components/FeaturesGrid";
 import CTASection from "@/components/CTASection";
 import Footer from "@/components/Footer";
+import CustomCursor from "@/components/CustomCursor";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black text-white">
+      <CustomCursor />
       <Header />
       <HeroSection />
       {/* <ScreenshotSection />
