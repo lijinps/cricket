@@ -1,7 +1,7 @@
 interface Player {
   id: number;
   name: string;
-  role: "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper";
+  role: "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper" | "";
   battingAvg: number;
   bowlingAvg?: number;
   matches: number;

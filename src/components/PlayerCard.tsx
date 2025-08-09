@@ -48,7 +48,7 @@ export default function PlayerCard({ player, onSelect }: PlayerCardProps) {
               player.role
             )}`}
           >
-            {player.role}
+            {player.role !== "" ? player.role : "Player"}
           </div>
           <div className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500/20 text-orange-300 border border-orange-500/30">
             {player.category}

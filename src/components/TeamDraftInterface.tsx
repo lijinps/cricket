@@ -41,7 +41,10 @@ export default function TeamDraftInterface() {
   const [isDownloading, setIsDownloading] = useState(false);
   const teamsRef = useRef<HTMLDivElement>(null);
 
-  const categories = ["A", "B", "B1", "C", "C1", "D", "D1", "E", "E1"];
+  // Extract unique categories from player pool data
+  const categories = Array.from(
+    new Set(playerPool.map((player) => player.category))
+  ).sort();
   const teamColors = [
     "bg-red-500",
     "bg-blue-500",
