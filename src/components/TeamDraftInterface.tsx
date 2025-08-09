@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PlayerCard from "./PlayerCard";
 import { playerPool } from "./TeamSelectionInterface";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 interface Player {
   id: number;
@@ -36,6 +38,8 @@ export default function TeamDraftInterface() {
   const [draftResults, setDraftResults] = useState<{
     [category: string]: { [teamId: number]: Player };
   }>({});
+  const [isDownloading, setIsDownloading] = useState(false);
+  const teamsRef = useRef<HTMLDivElement>(null);
 
   const categories = ["A", "B", "B1", "C", "C1", "D", "D1", "E", "E1"];
   const teamColors = [
@@ -199,6 +203,109 @@ export default function TeamDraftInterface() {
 
   const getDraftedPlayer = (teamId: number, category: string) => {
     return draftResults[category]?.[teamId];
+  };
+
+  const downloadTeamsAsPDF = async () => {
+    if (!teamsRef.current) return;
+
+    setIsDownloading(true);
+
+    try {
+      // Create PDF document
+      const pdf = new jsPDF({
+        orientation: "portrait",
+        unit: "mm",
+        format: "a4",
+      });
+
+      // Add header
+      pdf.setFontSize(24);
+      pdf.setTextColor(255, 120, 73); // Orange color
+      pdf.text("🏏 Onam Premier League Season-2", 105, 20, { align: "center" });
+
+      pdf.setFontSize(18);
+      pdf.setTextColor(16, 185, 129); // Green color
+      pdf.text("🎉 Final Team Draft Results", 105, 35, { align: "center" });
+
+      pdf.setFontSize(12);
+      pdf.setTextColor(100, 100, 100);
+      const date = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      pdf.text(`Generated on ${date}`, 105, 45, { align: "center" });
+
+      // Add teams data
+      let yPosition = 60;
+
+      teams.forEach((team, teamIndex) => {
+        // Team header
+        pdf.setFontSize(16);
+        pdf.setTextColor(0, 0, 0);
+        pdf.text(`${team.name} (Owner: ${team.owner.name})`, 20, yPosition);
+        yPosition += 10;
+
+        // Draw line under team name
+        pdf.setLineWidth(0.5);
+        pdf.line(20, yPosition - 2, 190, yPosition - 2);
+        yPosition += 5;
+
+        // Add owner first
+        pdf.setFontSize(11);
+        pdf.setTextColor(255, 159, 67); // Orange for owner
+        pdf.text(
+          `👑 ${team.owner.name} (OWNER) - Cat ${team.owner.category} - ${team.owner.role}`,
+          25,
+          yPosition
+        );
+        yPosition += 7;
+
+        // Add drafted players
+        const draftedPlayers = team.players.filter((p) => !p.isOwner);
+        draftedPlayers.forEach((player) => {
+          pdf.setTextColor(0, 0, 0);
+          pdf.text(
+            `• ${player.name} - Cat ${player.category} - ${player.role}`,
+            25,
+            yPosition
+          );
+          yPosition += 6;
+        });
+
+        yPosition += 8; // Space between teams
+
+        // Add new page if needed (except for last team)
+        if (teamIndex < teams.length - 1 && yPosition > 250) {
+          pdf.addPage();
+          yPosition = 20;
+        }
+      });
+
+      // Add footer
+      pdf.setFontSize(10);
+      pdf.setTextColor(150, 150, 150);
+      const footerY = pdf.internal.pageSize.height - 15;
+      pdf.text(
+        "Team of Puthumanassery • Fair Draft System • Four Teams Under Owners",
+        105,
+        footerY,
+        { align: "center" }
+      );
+
+      // Download PDF
+      const fileName = `Onam-Premier-League-Teams-${new Date()
+        .toISOString()
+        .slice(0, 10)}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      alert("Error generating PDF. Please try again.");
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -422,13 +529,38 @@ export default function TeamDraftInterface() {
               <h2 className="text-3xl font-bold text-green-400 mb-4">
                 🎉 Draft Completed!
               </h2>
-              <p className="text-gray-300 text-lg">
+              <p className="text-gray-300 text-lg mb-6">
                 All teams have been formed with fair distribution
               </p>
+
+              {/* Download PDF Button */}
+              <button
+                onClick={downloadTeamsAsPDF}
+                disabled={isDownloading}
+                className={`px-6 py-3 rounded-lg font-semibold text-lg transition-all ${
+                  isDownloading
+                    ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                    : "bg-red-500 hover:bg-red-600 text-white hover:scale-105"
+                }`}
+              >
+                {isDownloading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    Generating PDF...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    📄 Download Teams as PDF
+                  </div>
+                )}
+              </button>
             </div>
 
             {/* Final Teams */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div
+              ref={teamsRef}
+              className="grid grid-cols-1 lg:grid-cols-2 gap-8"
+            >
               {teams.map((team) => (
                 <div
                   key={team.id}
