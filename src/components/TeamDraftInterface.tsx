@@ -290,11 +290,29 @@ export default function TeamDraftInterface() {
 
               {/* Available Players */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {getCurrentCategoryPlayers().map((player) => (
-                  <div key={player.id} className="transform scale-90">
-                    <PlayerCard player={player} onSelect={() => {}} />
-                  </div>
-                ))}
+                {/* Show owner first if exists in category (for display purposes) - only before drafting */}
+                {getOwnerInCategory(currentCategory) &&
+                  !draftResults[currentCategory] && (
+                    <div className="transform scale-90">
+                      <div className="relative">
+                        <PlayerCard
+                          player={getOwnerInCategory(currentCategory)!}
+                          onSelect={() => {}}
+                        />
+                        <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full">
+                          AUTO-ASSIGNED
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                {/* Show regular players available for tossing - only before drafting */}
+                {!draftResults[currentCategory] &&
+                  getCurrentCategoryPlayers().map((player) => (
+                    <div key={player.id} className="transform scale-90">
+                      <PlayerCard player={player} onSelect={() => {}} />
+                    </div>
+                  ))}
               </div>
 
               {/* Draft Action */}
