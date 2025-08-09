@@ -1,7 +1,7 @@
 interface Player {
   id: number;
   name: string;
-  role: "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper";
+  role: "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper" | "";
   battingAvg: number;
   bowlingAvg?: number;
   matches: number;
@@ -54,7 +54,7 @@ export default function PlayerCard({ player, onSelect }: PlayerCardProps) {
             {player.category}
           </div>
         </div>
-        <div
+        {/* <div
           className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
             player.isSelected ? "bg-red-500 border-red-500" : "border-gray-500"
           }`}
@@ -72,7 +72,7 @@ export default function PlayerCard({ player, onSelect }: PlayerCardProps) {
               />
             </svg>
           )}
-        </div>
+        </div> */}
       </div>
 
       {/* Player Info */}

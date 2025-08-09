@@ -18,7 +18,7 @@ interface Player {
   isOwner?: boolean;
 }
 
-const playerPool: Player[] = [
+export const playerPool: Player[] = [
   // Category A Players
   {
     id: 1,
@@ -490,7 +490,7 @@ export default function TeamSelectionInterface() {
             >
               Player Selection
             </button>
-            <button
+            {/* <button
               onClick={() => setViewMode("formation")}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
                 viewMode === "formation"
@@ -499,7 +499,7 @@ export default function TeamSelectionInterface() {
               }`}
             >
               Field Formation
-            </button>
+            </button> */}
             <button
               onClick={() => setViewMode("draft")}
               className={`px-4 py-2 rounded-md font-medium transition-colors ${
@@ -516,7 +516,7 @@ export default function TeamSelectionInterface() {
         {viewMode === "selection" ? (
           <>
             {/* Selection Summary */}
-            <div className="bg-gray-800/30 rounded-lg p-4 sm:p-6 mb-8 border border-gray-700/50">
+            {/* <div className="bg-gray-800/30 rounded-lg p-4 sm:p-6 mb-8 border border-gray-700/50">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-2">
@@ -526,7 +526,6 @@ export default function TeamSelectionInterface() {
                     {selectedTeam.length}/11 players selected
                   </p>
 
-                  {/* Category breakdown */}
                   <div className="mt-3 flex flex-wrap gap-2">
                     {getCategoryStats()
                       .filter((stat) => stat.selected > 0)
@@ -560,7 +559,6 @@ export default function TeamSelectionInterface() {
                 </div>
               </div>
 
-              {/* Selected Players Preview */}
               {selectedTeam.length > 0 && (
                 <div className="mt-4 pt-4 border-t border-gray-700/50">
                   <div className="flex flex-wrap gap-2">
@@ -575,7 +573,7 @@ export default function TeamSelectionInterface() {
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Player Pool */}
             <div>
