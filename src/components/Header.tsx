@@ -1,4 +1,5 @@
 import Logo from "./Logo";
+import Link from "next/link";
 
 export default function Header() {
   return (
@@ -20,18 +21,18 @@ export default function Header() {
           {/* Navigation */}
           <div className="ml-auto flex items-center">
             <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              <a
+              <Link
                 href="/"
                 className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base"
               >
                 Home
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/team-selection"
                 className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base"
               >
                 Team Selection
-              </a>
+              </Link>
               <a
                 href="#"
                 className="text-gray-300 hover:text-white transition-colors text-sm lg:text-base"

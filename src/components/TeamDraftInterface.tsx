@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from "react";
 import PlayerCard from "./PlayerCard";
 import { playerPool } from "./TeamSelectionInterface";
 import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
 
 interface Player {
   id: number;

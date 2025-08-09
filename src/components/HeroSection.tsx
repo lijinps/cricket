@@ -1,4 +1,5 @@
 import MovingCricketBall from "./MovingCricketBall";
+import Link from "next/link";
 
 export default function HeroSection() {
   return (
@@ -24,12 +25,12 @@ export default function HeroSection() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
+          <Link
             href="/team-selection"
             className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-semibold transition-colors text-base sm:text-lg text-center inline-block"
           >
             TEAM SELECTION
-          </a>
+          </Link>
         </div>
       </div>
     </section>
