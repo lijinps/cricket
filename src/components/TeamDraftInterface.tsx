@@ -443,10 +443,20 @@ export default function TeamDraftInterface() {
   const performDraft = (category: string) => {
     setIsSpinning(true);
 
+    // Random delay between 1.5 to 3.5 seconds for more suspense
+    const randomDelay = 1500 + Math.random() * 2000;
+
     setTimeout(() => {
       const availablePlayers = getAvailablePlayersForCategory(category);
       const ownerInCategory = getOwnerInCategory(category);
       const categoryResults: { [teamId: number]: Player } = {};
+
+      // Create a custom random function with timestamp seed for extra entropy
+      const timeSeed = Date.now() % 1000;
+      const getRandomWithSeed = (seed: number = timeSeed) => {
+        const x = Math.sin(seed + Math.random() * 1000) * 10000;
+        return x - Math.floor(x);
+      };
 
       // If there's an owner in this category, assign them to their team directly
       if (ownerInCategory) {
@@ -458,18 +468,54 @@ export default function TeamDraftInterface() {
         }
       }
 
-      // For remaining teams, randomly assign from available players
+      // For remaining teams, randomly assign from available players with enhanced randomness
       const teamsNeedingPlayers = teams.filter(
         (team) => !categoryResults[team.id]
       );
       if (availablePlayers.length > 0 && teamsNeedingPlayers.length > 0) {
-        const shuffledPlayers = [...availablePlayers].sort(
-          () => Math.random() - 0.5
-        );
+        // Multiple rounds of shuffling for better randomness
+        let shuffledPlayers = [...availablePlayers];
 
-        teamsNeedingPlayers.forEach((team, index) => {
-          if (shuffledPlayers[index]) {
-            categoryResults[team.id] = shuffledPlayers[index];
+        // Multiple rounds of Fisher-Yates shuffle for maximum randomness
+        for (let round = 0; round < 3; round++) {
+          for (let i = shuffledPlayers.length - 1; i > 0; i--) {
+            const j = Math.floor(
+              getRandomWithSeed(timeSeed + round + i) * (i + 1)
+            );
+            [shuffledPlayers[i], shuffledPlayers[j]] = [
+              shuffledPlayers[j],
+              shuffledPlayers[i],
+            ];
+          }
+        }
+
+        // Additional random sorting with custom entropy
+        shuffledPlayers = shuffledPlayers.sort(() => getRandomWithSeed() - 0.5);
+
+        // Shuffle teams multiple times for extra randomness
+        let shuffledTeams = [...teamsNeedingPlayers];
+        for (let round = 0; round < 2; round++) {
+          shuffledTeams = shuffledTeams.sort(
+            () => getRandomWithSeed(timeSeed + round) - 0.5
+          );
+        }
+
+        // Create random indices array for even more chaos
+        const randomIndices = Array.from(
+          { length: shuffledPlayers.length },
+          (_, i) => i
+        ).sort(() => getRandomWithSeed() - 0.5);
+
+        // Final assignment using random indices for ultimate randomness
+        shuffledTeams.forEach((team, index) => {
+          const randomIndex = randomIndices[index] || 0;
+          if (shuffledPlayers[randomIndex]) {
+            categoryResults[team.id] = shuffledPlayers[randomIndex];
+            // Remove assigned player to avoid duplicates
+            shuffledPlayers.splice(randomIndex, 1);
+            randomIndices.forEach((val, idx) => {
+              if (val > randomIndex) randomIndices[idx] = val - 1;
+            });
           }
         });
       }
@@ -491,7 +537,7 @@ export default function TeamDraftInterface() {
       );
 
       setIsSpinning(false);
-    }, 2000);
+    }, randomDelay);
   };
 
   const startDraft = () => {
@@ -629,7 +675,9 @@ export default function TeamDraftInterface() {
                     {isSpinning ? (
                       <div className="flex items-center gap-2">
                         <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                        Tossing...
+                        <div className="animate-pulse">🎲</div>
+                        <div className="animate-bounce">⚡</div>
+                        Tossing with Enhanced Randomness...
                       </div>
                     ) : getOwnerInCategory(currentCategory) ? (
                       `🎲 Toss Category ${currentCategory} (Owner Auto-Assigned)`
