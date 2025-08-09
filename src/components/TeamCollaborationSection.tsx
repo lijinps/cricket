@@ -49,9 +49,11 @@ export default function TeamCollaborationSection() {
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-green-500 rounded-full"></div>
                 <div>
-                  <p className="font-medium text-white">Captain's Message</p>
+                  <p className="font-medium text-white">
+                    Captain&apos;s Message
+                  </p>
                   <p className="text-sm text-gray-300">
-                    Great practice today! Ready for Sunday's match.
+                    Great practice today! Ready for Sunday&apos;s match.
                   </p>
                 </div>
               </div>

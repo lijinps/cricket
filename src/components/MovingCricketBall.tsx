@@ -26,30 +26,44 @@ export default function MovingCricketBall({
 }: MovingCricketBallProps) {
   const [balls, setBalls] = useState<Ball[]>([]);
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(0);
 
   useEffect(() => {
+    // Check if device is mobile
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
     setIsVisible(true);
 
-    // Generate balls based on ballCount
+    // Generate balls based on ballCount and device type
     const generateBalls = (count: number): Ball[] => {
       const balls: Ball[] = [];
       const container = containerRef.current;
       const maxX = container ? container.offsetWidth : 500;
       const maxY = container ? container.offsetHeight : 400;
 
-      for (let i = 0; i < count; i++) {
+      // Reduce ball count and size on mobile
+      const mobileAdjustedCount = isMobile ? Math.min(count, 1) : count;
+      const baseSizeMultiplier = isMobile ? 0.8 : 1;
+      const speedMultiplier = isMobile ? 0.8 : 1;
+
+      for (let i = 0; i < mobileAdjustedCount; i++) {
         balls.push({
           id: i + 1,
-          x: Math.random() * (maxX - 100) + 50, // Random position within bounds
+          x: Math.random() * (maxX - 100) + 50,
           y: Math.random() * (maxY - 100) + 50,
-          vx: (Math.random() - 0.5) * 4 * speed, // Speed-adjusted velocity
-          vy: (Math.random() - 0.5) * 4 * speed,
-          size: Math.random() * 20 + 30, // Random size between 30-50
-          rotation: Math.random() * 360, // Random initial rotation
-          rotationSpeed: (Math.random() - 0.5) * 8 * speed, // Speed-adjusted rotation
+          vx: (Math.random() - 0.5) * 4 * speed * speedMultiplier,
+          vy: (Math.random() - 0.5) * 4 * speed * speedMultiplier,
+          size: (Math.random() * 20 + 25) * baseSizeMultiplier,
+          rotation: Math.random() * 360,
+          rotationSpeed: (Math.random() - 0.5) * 8 * speed * speedMultiplier,
         });
       }
 
@@ -59,40 +73,33 @@ export default function MovingCricketBall({
     setBalls(generateBalls(ballCount));
 
     const animate = (currentTime: number) => {
-      // Calculate delta time for smooth movement
       const deltaTime = lastTimeRef.current
         ? currentTime - lastTimeRef.current
-        : 16.67; // Default to 60fps
+        : 16.67;
       lastTimeRef.current = currentTime;
-
-      // Normalize movement to 60fps
       const timeScale = deltaTime / 16.67;
 
       setBalls((prevBalls) => {
         return prevBalls.map((ball) => {
-          // Update position with time-based movement
           let newX = ball.x + ball.vx * timeScale;
           let newY = ball.y + ball.vy * timeScale;
           let newVx = ball.vx;
           let newVy = ball.vy;
 
-          // Get container bounds
           const container = containerRef.current;
           const maxX = container ? container.offsetWidth - ball.size : 500;
           const maxY = container ? container.offsetHeight - ball.size : 400;
 
-          // Bounce off edges with smooth collision
           if (newX <= 0 || newX >= maxX) {
-            newVx = -newVx * 0.98; // Slight energy loss for realism
+            newVx = -newVx * 0.98;
             newX = newX <= 0 ? 0 : maxX;
           }
 
           if (newY <= 0 || newY >= maxY) {
-            newVy = -newVy * 0.98; // Slight energy loss for realism
+            newVy = -newVy * 0.98;
             newY = newY <= 0 ? 0 : maxY;
           }
 
-          // Update rotation with time-based movement
           const newRotation = ball.rotation + ball.rotationSpeed * timeScale;
 
           return {
@@ -115,8 +122,9 @@ export default function MovingCricketBall({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
+      window.removeEventListener("resize", checkMobile);
     };
-  }, [ballCount, speed]);
+  }, [ballCount, speed, isMobile]);
 
   return (
     <div
@@ -153,33 +161,34 @@ export default function MovingCricketBall({
           >
             <motion.div
               animate={{
-                y: [0, -10, 0],
+                y: isMobile ? 0 : [0, -10, 0],
               }}
               transition={{
-                duration: 2 / speed, // Speed-adjusted bounce duration
-                repeat: Infinity,
+                duration: isMobile ? 0 : 2 / speed,
+                repeat: isMobile ? 0 : Infinity,
                 ease: "easeInOut",
               }}
             >
               <CricketBallSVG width={ball.size} height={ball.size} />
             </motion.div>
 
-            {/* Trail effect */}
-            <motion.div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-              animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.2, 0, 0.2],
-              }}
-              transition={{
-                duration: 1.5 / speed, // Speed-adjusted trail duration
-                repeat: Infinity,
-                delay: index * 0.1,
-                ease: "easeInOut",
-              }}
-            >
-              <div className="w-4 h-4 bg-red-500 rounded-full"></div>
-            </motion.div>
+            {!isMobile && (
+              <motion.div
+                className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.2, 0, 0.2],
+                }}
+                transition={{
+                  duration: 1.5 / speed,
+                  repeat: Infinity,
+                  delay: index * 0.1,
+                  ease: "easeInOut",
+                }}
+              >
+                <div className="w-4 h-4 bg-red-500 rounded-full"></div>
+              </motion.div>
+            )}
           </motion.div>
         ))}
       </AnimatePresence>

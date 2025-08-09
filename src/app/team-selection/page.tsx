@@ -1,21 +1,14 @@
 import Header from "@/components/Header";
-import HeroSection from "@/components/HeroSection";
 import CustomCursor from "@/components/CustomCursor";
+import TeamSelectionInterface from "@/components/TeamSelectionInterface";
 
-export default function Home() {
+export default function TeamSelection() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-black text-white overflow-x-hidden">
       <CustomCursor />
       <Header />
       <main className="relative">
-        <HeroSection />
-        {/* <ScreenshotSection />
-        <FeaturesSection />
-        <AIFeaturesSection />
-        <TeamCollaborationSection />
-        <FeaturesGrid />
-        <CTASection />
-        <Footer /> */}
+        <TeamSelectionInterface />
       </main>
     </div>
   );

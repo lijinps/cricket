@@ -71,8 +71,23 @@ function CricketBatSVG({
 export default function CustomCursor() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isVisible, setIsVisible] = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
+    // Check if device supports touch (mobile/tablet)
+    const checkTouchDevice = () => {
+      setIsTouchDevice(
+        "ontouchstart" in window || navigator.maxTouchPoints > 0
+      );
+    };
+
+    checkTouchDevice();
+
+    // Don't show custom cursor on touch devices
+    if (isTouchDevice) {
+      return;
+    }
+
     const handleMouseMove = (e: MouseEvent) => {
       setMousePosition({ x: e.clientX, y: e.clientY });
       setIsVisible(true);
@@ -91,8 +106,21 @@ export default function CustomCursor() {
     document.addEventListener("mouseenter", handleMouseEnter);
     document.addEventListener("mouseleave", handleMouseLeave);
 
-    // Hide default cursor
+    // Hide default cursor globally
     document.body.style.cursor = "none";
+    document.documentElement.style.cursor = "none";
+
+    // Hide cursor on all interactive elements
+    const style = document.createElement("style");
+    style.textContent = `
+      * {
+        cursor: none !important;
+      }
+      a, button, input, textarea, select, [role="button"], [tabindex] {
+        cursor: none !important;
+      }
+    `;
+    document.head.appendChild(style);
 
     return () => {
       // Cleanup event listeners
@@ -102,18 +130,29 @@ export default function CustomCursor() {
 
       // Restore default cursor
       document.body.style.cursor = "auto";
+      document.documentElement.style.cursor = "auto";
+
+      // Remove the style element
+      if (style.parentNode) {
+        style.parentNode.removeChild(style);
+      }
     };
-  }, []);
+  }, [isTouchDevice]);
+
+  // Don't render custom cursor on touch devices
+  if (isTouchDevice) {
+    return null;
+  }
 
   return (
     <motion.div
-      className="fixed pointer-events-none z-50"
+      className="fixed pointer-events-none"
       animate={{
-        x: mousePosition.x - 16, // Center the cursor (32px width / 2)
-        y: mousePosition.y - 16, // Center the cursor (32px height / 2)
+        x: mousePosition.x - 16,
+        y: mousePosition.y - 16,
         opacity: isVisible ? 1 : 0,
         scale: isVisible ? 1 : 0.8,
-        rotate: [0, 5, -5, 0], // Subtle rotation animation
+        rotate: [0, 5, -5, 0],
       }}
       transition={{
         x: { duration: 0.1, ease: "linear" },
@@ -126,6 +165,7 @@ export default function CustomCursor() {
         left: 0,
         top: 0,
         transform: "translate(-50%, -50%)",
+        zIndex: 9999,
       }}
     >
       <CricketBatSVG width={32} height={32} className="drop-shadow-lg" />
