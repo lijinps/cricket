@@ -419,7 +419,7 @@ export default function TeamDraftInterface() {
       id: index + 1,
       name: `Team ${owner.name}`,
       owner: owner,
-      players: [owner],
+      players: [], // Start with empty players array, owners will be added during draft
       color: teamColors[index],
     }));
     setTeams(initialTeams);
@@ -527,13 +527,19 @@ export default function TeamDraftInterface() {
 
       // Update teams with new players
       setTeams((prevTeams) =>
-        prevTeams.map((team) => ({
-          ...team,
-          players: [
-            ...team.players.filter((p) => p.category !== category || p.isOwner),
-            ...(categoryResults[team.id] ? [categoryResults[team.id]] : []),
-          ],
-        }))
+        prevTeams.map((team) => {
+          const newPlayer = categoryResults[team.id];
+          if (!newPlayer) return team;
+
+          // Check if this player is already in the team to avoid duplicates
+          const playerExists = team.players.some((p) => p.id === newPlayer.id);
+          if (playerExists) return team;
+
+          return {
+            ...team,
+            players: [...team.players, newPlayer],
+          };
+        })
       );
 
       setIsSpinning(false);
@@ -789,31 +795,49 @@ export default function TeamDraftInterface() {
                     <p className="text-gray-300">Owner: {team.owner.name}</p>
                   </div>
                   <div className="space-y-3">
-                    {team.players.map((player) => (
-                      <div
-                        key={player.id}
-                        className="flex justify-between items-center bg-gray-800/30 rounded-lg p-3"
-                      >
-                        <div>
-                          <span className="text-white font-medium">
-                            {player.name}
-                          </span>
-                          {player.isOwner && (
-                            <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
-                              👑
-                            </span>
-                          )}
+                    {/* Always show owner first, then drafted players */}
+                    <div className="flex justify-between items-center bg-gray-800/30 rounded-lg p-3 border border-yellow-500/30">
+                      <div>
+                        <span className="text-white font-medium">
+                          {team.owner.name}
+                        </span>
+                        <span className="ml-2 text-xs bg-yellow-500/20 text-yellow-300 px-2 py-1 rounded">
+                          👑 OWNER
+                        </span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-orange-300 text-sm">
+                          Cat {team.owner.category}
                         </div>
-                        <div className="text-right">
-                          <div className="text-orange-300 text-sm">
-                            Cat {player.category}
-                          </div>
-                          <div className="text-gray-400 text-xs">
-                            {player.role}
-                          </div>
+                        <div className="text-gray-400 text-xs">
+                          {team.owner.role}
                         </div>
                       </div>
-                    ))}
+                    </div>
+
+                    {/* Show drafted players (excluding owner) */}
+                    {team.players
+                      .filter((p) => !p.isOwner)
+                      .map((player) => (
+                        <div
+                          key={player.id}
+                          className="flex justify-between items-center bg-gray-800/30 rounded-lg p-3"
+                        >
+                          <div>
+                            <span className="text-white font-medium">
+                              {player.name}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-orange-300 text-sm">
+                              Cat {player.category}
+                            </div>
+                            <div className="text-gray-400 text-xs">
+                              {player.role}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 </div>
               ))}
